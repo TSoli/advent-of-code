@@ -1,33 +1,23 @@
-#include <string>
-#include <string_view>
+#include <limits.h>
+
 #include <fstream>
 #include <iostream>
 #include <ranges>
+#include <string>
 #include <unordered_map>
-#include <iterator>
-#include <limits.h>
 
 template <typename Iter>
 int getDigit(Iter begin, Iter end, bool fromEnd = false);
 
 const std::unordered_map<std::string, int> DIGITS = {
-  {"zero", 0},
-  {"one", 1},
-  {"two", 2},
-  {"three", 3},
-  {"four", 4},
-  {"five", 5},
-  {"six", 6},
-  {"seven", 7},
-  {"eight", 8},
-  {"nine", 9}
-};
+    {"zero", 0}, {"one", 1}, {"two", 2},   {"three", 3}, {"four", 4},
+    {"five", 5}, {"six", 6}, {"seven", 7}, {"eight", 8}, {"nine", 9}};
 
 int main() {
   std::string filename = "input.txt";
   std::ifstream inf(filename);
   if (!inf) {
-    std::cerr << "Couldn't open " + filename +"\n";
+    std::cerr << "Couldn't open " + filename + "\n";
     return 1;
   }
 
@@ -57,8 +47,7 @@ int getDigit(Iter begin, Iter end, bool fromEnd) {
     }
   }
 
-  for (auto& [str, num] : DIGITS) {
-    Iter it;
+  for (auto &[str, num] : DIGITS) {
     int currPos = -1;
     if (fromEnd) {
       std::string revStr(str.rbegin(), str.rend());

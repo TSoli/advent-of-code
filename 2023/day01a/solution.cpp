@@ -1,13 +1,13 @@
-#include <string>
 #include <fstream>
 #include <iostream>
 #include <ranges>
+#include <string>
 
 int main() {
-  std::string filename = "input.txt";
-  std::ifstream inf(filename);
+  std::string filename{"input.txt"};
+  std::ifstream inf{filename};
   if (!inf) {
-    std::cerr << "Couldn't open " + filename +"\n";
+    std::cerr << "Couldn't open " + filename + "\n";
     return 1;
   }
 
