@@ -139,8 +139,6 @@ int main(int argc, char *argv[]) {
     sum += canDisintegrate;
   }
 
-  // we take one because id 0 is the ground and was not included in supporting
-  // anything
   std::cout << "Num bricks: " << sum << "\n";
 
   return 0;
