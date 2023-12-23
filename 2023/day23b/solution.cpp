@@ -124,10 +124,10 @@ getJunctions(const std::vector<std::string> &map, const Pos &startPos,
   return junctions;
 }
 
-// There is probs a faster way but this gets done in like 2min...
+// There is probs a faster way but this gets done in like 30s...
 void getLongestPath(const Pos &startPos, int currSteps,
                     std::unordered_map<Pos, Junction> &junctions,
-                    std::unordered_set<Pos> visited,
+                    std::unordered_set<Pos> &visited,
                     std::unordered_map<Pos, int> &maxDistances) {
   visited.insert(startPos);
   maxDistances[startPos] = std::max(currSteps, maxDistances[startPos]);
@@ -138,6 +138,8 @@ void getLongestPath(const Pos &startPos, int currSteps,
                      maxDistances);
     }
   }
+
+  visited.erase(visited.find(startPos));
 }
 
 int main(int argc, char *argv[]) {
