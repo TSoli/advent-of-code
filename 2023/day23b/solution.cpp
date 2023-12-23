@@ -124,15 +124,12 @@ getJunctions(const std::vector<std::string> &map, const Pos &startPos,
   return junctions;
 }
 
+// There is probs a faster way but this gets done in like 2min...
 void getLongestPath(const Pos &startPos, int currSteps,
                     std::unordered_map<Pos, Junction> &junctions,
                     std::unordered_set<Pos> visited,
                     std::unordered_map<Pos, int> &maxDistances) {
   visited.insert(startPos);
-  // if (currSteps < maxDistances[startPos]) {
-  //   return;
-  // }
-
   maxDistances[startPos] = std::max(currSteps, maxDistances[startPos]);
 
   for (const auto &edge : junctions.at(startPos).edges) {
@@ -185,13 +182,10 @@ int main(int argc, char *argv[]) {
   std::unordered_map<Pos, Junction> junctions{
       getJunctions(map, startPos, endPos)};
 
-  // for (const auto &[p, j] : junctions) {
-  //   std::cout << p[0] << " " << p[1] << " " << j.edges.size() << "\n";
-  // }
-
   int currSteps{0};
   std::unordered_set<Pos> visited;
   std::unordered_map<Pos, int> maxDistances;
+  std::cout << "Finding longest path\n";
   getLongestPath(startPos, currSteps, junctions, visited, maxDistances);
 
   std::cout << "Longest path distance: " << maxDistances.at(endPos) << "\n";
