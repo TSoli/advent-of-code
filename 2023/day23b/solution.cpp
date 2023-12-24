@@ -1,4 +1,5 @@
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
@@ -9,15 +10,18 @@ using Pos = std::array<int, 2>;
 
 struct Edge {
   int cost;
+  int id;
   Pos pos;
 };
 
 struct Junction {
+  int id;
   Pos pos;
   std::vector<Edge> edges;
 };
 
-template <> struct std::hash<Pos> {
+template <>
+struct std::hash<Pos> {
   size_t operator()(const Pos &s) const noexcept {
     size_t h1 = std::hash<int>{}(s[0]);
     size_t h2 = std::hash<int>{}(s[1]);
@@ -50,11 +54,16 @@ bool isJunction(const Pos &pos, const std::vector<std::string> &map) {
 
 Edge getEdge(Pos pos, const Pos &startPos, const Pos &endPos,
              const std::vector<std::string> &map,
+             const std::unordered_map<Pos, Junction> &junctions,
              std::unordered_set<Pos> &visited) {
   int cost{1};
+  int id{-1};
   while (!isJunction(pos, map)) {
-    if (pos == startPos || pos == endPos) {
-      return {cost, pos};
+    if (pos == startPos) {
+      return {cost, 0, pos};
+    }
+    if (pos == endPos) {
+      return {cost, 63, pos};
     }
 
     visited.insert(pos);
@@ -70,21 +79,24 @@ Edge getEdge(Pos pos, const Pos &startPos, const Pos &endPos,
 
       pos = newPos;
       ++cost;
+
       isDeadEnd = false;
       break;
     }
 
     if (isDeadEnd) {
-      return {0, pos};
+      return {0, -1, pos};
     }
   }
 
-  return {cost, pos};
+  id = junctions.at(pos).id;
+  return {cost, id, pos};
 }
 
 std::vector<Edge> getEdges(const Pos &pos, const Pos &startPos,
                            const Pos &endPos,
-                           const std::vector<std::string> &map) {
+                           const std::vector<std::string> &map,
+                           const std::unordered_map<Pos, Junction> &junctions) {
   std::vector<Edge> edges;
 
   for (const auto &direction : directions) {
@@ -97,7 +109,7 @@ std::vector<Edge> getEdges(const Pos &pos, const Pos &startPos,
 
     std::unordered_set<Pos> visited;
     visited.insert(pos);
-    Edge edge{getEdge(newPos, startPos, endPos, map, visited)};
+    Edge edge{getEdge(newPos, startPos, endPos, map, junctions, visited)};
     if (edge.cost != 0) {
       edges.push_back(edge);
     }
@@ -106,40 +118,45 @@ std::vector<Edge> getEdges(const Pos &pos, const Pos &startPos,
   return edges;
 }
 
-std::unordered_map<Pos, Junction>
-getJunctions(const std::vector<std::string> &map, const Pos &startPos,
-             const Pos &endPos) {
+std::unordered_map<Pos, Junction> getJunctions(
+    const std::vector<std::string> &map, const Pos &startPos,
+    const Pos &endPos) {
+  int id{1};
   std::unordered_map<Pos, Junction> junctions;
 
   for (int i = 0; i < map.size(); ++i) {
     for (int j = 0; j < map[i].size(); ++j) {
-      if (isJunction({i, j}, map) || Pos{i, j} == startPos ||
-          Pos{i, j} == endPos) {
-        std::vector<Edge> edges = getEdges({i, j}, startPos, endPos, map);
-        junctions[{i, j}] = {{i, j}, edges};
+      if (isJunction({i, j}, map)) {
+        junctions[{i, j}] = {id, {i, j}, {}};
+        ++id;
+      } else if (Pos{i, j} == startPos) {
+        junctions[{i, j}] = {0, {i, j}, {}};
+      } else if (Pos{i, j} == endPos) {
+        junctions[{i, j}] = {63, {i, j}, {}};
       }
     }
+  }
+
+  for (auto &[pos, junction] : junctions) {
+    junction.edges = getEdges(junction.pos, startPos, endPos, map, junctions);
   }
 
   return junctions;
 }
 
-// There is probs a faster way but this gets done in like 30s...
 void getLongestPath(const Pos &startPos, int currSteps,
                     std::unordered_map<Pos, Junction> &junctions,
-                    std::unordered_set<Pos> &visited,
-                    std::unordered_map<Pos, int> &maxDistances) {
-  visited.insert(startPos);
-  maxDistances[startPos] = std::max(currSteps, maxDistances[startPos]);
+                    unsigned long visited, std::vector<int> &maxDistances) {
+  int id{junctions.at(startPos).id};
+  visited |= (1L << id);
+  maxDistances[id] = std::max(currSteps, maxDistances[id]);
 
   for (const auto &edge : junctions.at(startPos).edges) {
-    if (!visited.contains(edge.pos)) {
+    if ((visited & (1L << edge.id)) == 0) {
       getLongestPath(edge.pos, currSteps + edge.cost, junctions, visited,
                      maxDistances);
     }
   }
-
-  visited.erase(visited.find(startPos));
 }
 
 int main(int argc, char *argv[]) {
@@ -185,12 +202,10 @@ int main(int argc, char *argv[]) {
       getJunctions(map, startPos, endPos)};
 
   int currSteps{0};
-  std::unordered_set<Pos> visited;
-  std::unordered_map<Pos, int> maxDistances;
-  std::cout << "Finding longest path\n";
-  getLongestPath(startPos, currSteps, junctions, visited, maxDistances);
+  std::vector<int> maxDistances(64);
+  getLongestPath(startPos, currSteps, junctions, 0, maxDistances);
 
-  std::cout << "Longest path distance: " << maxDistances.at(endPos) << "\n";
+  std::cout << "Longest path distance: " << maxDistances[63] << "\n";
 
   return 0;
 }
