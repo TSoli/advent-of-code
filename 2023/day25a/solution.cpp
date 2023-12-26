@@ -60,6 +60,7 @@ bool bfs(int s, int t, Graph &residual) {
   return true;
 }
 
+// Ford-Fulkerson algo
 int minCut(int s, int t, Graph &graph, int maxCuts = 3) {
   int numCuts{0};
   while (bfs(s, t, graph)) {
