@@ -1,3 +1,6 @@
+# ignore input files
+*input.txt
+
 # Prerequisites
 *.d
 
