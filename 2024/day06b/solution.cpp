@@ -7,8 +7,8 @@
 
 // An obstacle on a row or column
 struct Obstacle {
-  size_t pos;                   // index position
-  std::array<bool, 2> visited;  // visited from negative or positive side
+  size_t pos;                  // index position
+  std::array<bool, 2> visited; // visited from negative or positive side
 };
 
 enum Direction { Up, Right, Down, Left };
@@ -35,7 +35,8 @@ void getObstacles(std::ifstream &inf,
     }
     grid.push_back(row);
 
-    if (!obstaclesX.size()) obstaclesX.resize(row.length());
+    if (!obstaclesX.size())
+      obstaclesX.resize(row.length());
 
     size_t obstaclePos{row.find('#')};
     std::vector<Obstacle> obstacleY;
@@ -58,50 +59,54 @@ bool isLoop(std::vector<std::vector<Obstacle>> obstaclesX,
   while (inbounds) {
     inbounds = false;
     switch (currDirection) {
-      case Direction::Up:
-        for (auto &obstacle : std::ranges::reverse_view(obstaclesX[currX])) {
-          if (obstacle.pos < currY) {
-            currY = obstacle.pos + 1;
-            inbounds = true;
-            if (obstacle.visited[1]) return true;
-            obstacle.visited[1] = true;
-            break;
-          }
+    case Direction::Up:
+      for (auto &obstacle : std::ranges::reverse_view(obstaclesX[currX])) {
+        if (obstacle.pos < currY) {
+          currY = obstacle.pos + 1;
+          inbounds = true;
+          if (obstacle.visited[1])
+            return true;
+          obstacle.visited[1] = true;
+          break;
         }
-        break;
-      case Direction::Right:
-        for (auto &obstacle : obstaclesY[currY]) {
-          if (obstacle.pos > currX) {
-            currX = obstacle.pos - 1;
-            inbounds = true;
-            if (obstacle.visited[0]) return true;
-            obstacle.visited[0] = true;
-            break;
-          }
+      }
+      break;
+    case Direction::Right:
+      for (auto &obstacle : obstaclesY[currY]) {
+        if (obstacle.pos > currX) {
+          currX = obstacle.pos - 1;
+          inbounds = true;
+          if (obstacle.visited[0])
+            return true;
+          obstacle.visited[0] = true;
+          break;
         }
-        break;
-      case Direction::Down:
-        for (auto &obstacle : obstaclesX[currX]) {
-          if (obstacle.pos > currY) {
-            currY = obstacle.pos - 1;
-            inbounds = true;
-            if (obstacle.visited[0]) return true;
-            obstacle.visited[0] = true;
-            break;
-          }
+      }
+      break;
+    case Direction::Down:
+      for (auto &obstacle : obstaclesX[currX]) {
+        if (obstacle.pos > currY) {
+          currY = obstacle.pos - 1;
+          inbounds = true;
+          if (obstacle.visited[0])
+            return true;
+          obstacle.visited[0] = true;
+          break;
         }
-        break;
-      case Direction::Left:
-        for (auto &obstacle : std::ranges::reverse_view(obstaclesY[currY])) {
-          if (obstacle.pos < currX) {
-            currX = obstacle.pos + 1;
-            inbounds = true;
-            if (obstacle.visited[1]) return true;
-            obstacle.visited[1] = true;
-            break;
-          }
+      }
+      break;
+    case Direction::Left:
+      for (auto &obstacle : std::ranges::reverse_view(obstaclesY[currY])) {
+        if (obstacle.pos < currX) {
+          currX = obstacle.pos + 1;
+          inbounds = true;
+          if (obstacle.visited[1])
+            return true;
+          obstacle.visited[1] = true;
+          break;
         }
-        break;
+      }
+      break;
     }
 
     // There are 4 directions in enum
@@ -167,7 +172,6 @@ int followPath(std::vector<std::vector<Obstacle>> &obstaclesX,
     currX = nextX;
     currY = nextY;
   }
-  std::cout << numTimes << "\n";
   return loops;
 }
 
@@ -189,7 +193,8 @@ int main(int argc, char *argv[]) {
   Grid grid;
 
   getObstacles(inf, obstaclesX, obstaclesY, grid, currX, currY);
-  std::cout << followPath(obstaclesX, obstaclesY, grid, currX, currY)
+  std::cout << "Number of possible obstacle positions: "
+            << followPath(obstaclesX, obstaclesY, grid, currX, currY)
             << std::endl;
 
   return 0;
