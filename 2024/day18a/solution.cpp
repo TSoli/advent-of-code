@@ -25,21 +25,6 @@ bool inbounds(const int i, const int j) {
   return i >= 0 && i < kGridSize && j >= 0 && j < kGridSize;
 }
 
-int bfs(const std::unordered_set<int> &corrupted,
-        const std::vector<Position> &frontiers,
-        std::unordered_set<int> &visited, const Position &goal) {
-  std::vector<Position> nextFrontier;
-  for (const auto pos : frontiers) {
-    visited.insert(pos.i * kGridSize + pos.j);
-
-    if (pos == goal) return 1;
-  }
-
-  if (nextFrontier.empty()) return -1;
-
-  return 1 + bfs(corrupted, nextFrontier, visited, goal);
-}
-
 int aStar(const Position &start, const Position &goal,
           const std::unordered_set<int> &corrupted) {
   std::unordered_set<int> visited;
@@ -57,7 +42,8 @@ int aStar(const Position &start, const Position &goal,
     visited.insert(pos.i * kGridSize + pos.j);
 
     pq.pop();
-    if (pos == goal) return cost;
+    if (pos == goal)
+      return cost;
 
     for (const auto dir : kDirections) {
       int i{pos.i + dir.i};
