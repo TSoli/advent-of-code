@@ -5,6 +5,9 @@ project(AOC VERSION 1.0
             LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
 
 find_package(Eigen3 3.4 REQUIRED)
 
