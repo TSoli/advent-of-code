@@ -2,6 +2,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <vector>
 
 namespace aoc {
 void getInput(int argc, char *argv[], std::ifstream &inf) {
@@ -17,4 +19,13 @@ void getInput(int argc, char *argv[], std::ifstream &inf) {
     exit(2);
   }
 }
-}  // namespace aoc
+
+std::vector<std::string> readLines(std::ifstream &inf, char delim) {
+  std::vector<std::string> lines;
+  std::string line;
+  while (std::getline(inf, line)) {
+    lines.push_back(line);
+  }
+  return lines;
+}
+} // namespace aoc
