@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <ranges>
 #include <string>
 #include <vector>
 
