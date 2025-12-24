@@ -55,7 +55,16 @@ struct Position {
     return *this;
   }
 
-  constexpr bool operator==(const Position &p) { return i == p.i && j == p.j; }
+  constexpr bool operator==(const Position &p) const = default;
+};
+
+struct PositionHash {
+  size_t operator()(const Position &p) const noexcept {
+    size_t seed = 0;
+    seed ^= hash<int>{}(p.i) + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    seed ^= hash<int>{}(p.j) + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    return seed;
+  }
 };
 
 constexpr Direction kUp{-1, 0};
@@ -74,4 +83,5 @@ constexpr array<Direction, 8> kDirections8{
 bool inBounds(const vector<string> &graph, const Position &pos);
 int getNumEightConnected(const vector<string> &graph, const Position &pos,
                          char symbol);
-} // namespace aoc
+Position findSymbol(const vector<string> &graph, char symbol);
+}  // namespace aoc

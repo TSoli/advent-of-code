@@ -17,4 +17,16 @@ int getNumEightConnected(const vector<string> &graph, const Position &pos,
     return inBounds(graph, newPos) && graph[newPos.i][newPos.j] == symbol;
   });
 }
-} // namespace aoc
+
+Position findSymbol(const vector<string> &graph, char symbol) {
+  for (int i = 0; i < graph.size(); ++i) {
+    for (int j = 0; j < graph[i].size(); ++j) {
+      if (graph[i][j] == symbol) {
+        return {i, j};
+      }
+    }
+  }
+
+  return {-1, -1};
+}
+}  // namespace aoc
