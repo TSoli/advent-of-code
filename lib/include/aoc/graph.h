@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -67,6 +68,17 @@ struct PositionHash {
   }
 };
 
+template <size_t N>
+struct PositionND {
+  array<int, N> v;
+
+  constexpr int &operator[](size_t i) { return v[i]; };
+  constexpr int operator[](size_t i) const { return v[i]; };
+
+  constexpr auto begin() const noexcept { return v.begin(); };
+  constexpr auto end() const noexcept { return v.end(); };
+};
+
 constexpr Direction kUp{-1, 0};
 constexpr Direction kRight{0, 1};
 constexpr Direction kDown{1, 0};
@@ -84,4 +96,14 @@ bool inBounds(const vector<string> &graph, const Position &pos);
 int getNumEightConnected(const vector<string> &graph, const Position &pos,
                          char symbol);
 Position findSymbol(const vector<string> &graph, char symbol);
+
+template <size_t N>
+constexpr double euclidean(const PositionND<N> &p1, const PositionND<N> &p2) {
+  double total{0};
+  for (int i = 0; i < N; ++i) {
+    double d = p2[i] - p1[i];
+    total += d * d;
+  }
+  return sqrt(total);
+};
 }  // namespace aoc
