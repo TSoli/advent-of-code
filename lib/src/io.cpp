@@ -53,4 +53,14 @@ vector<int> getListInt(const string &str, const string &sep) {
   return ints;
 }
 
-}  // namespace aoc
+vector<long> getListLong(const string &str, const string &sep) {
+  vector<long> longs;
+  auto strings{getListString(str, sep)};
+  for (const auto &s : strings) {
+    longs.push_back(stol(s));
+  }
+
+  return longs;
+}
+
+} // namespace aoc
