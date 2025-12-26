@@ -144,11 +144,29 @@ vector<int> getBounds(const MatrixXd &m, const VectorXd &b) {
 int getMinPresses(const MatrixXd &m, const VectorXd &b) {
   int minPresses{0};
   for (int i = 0; i < m.rows(); ++i) {
-    if ((m.row(i).array() != 0).count() == 1) {
+    if ((m.row(i).array().cwiseAbs() > kTol).count() == 1) {
       minPresses += b(i);
     }
   }
   return minPresses;
+}
+
+void updateBounds(const MatrixXd &m, const VectorXd &b,
+                  const vector<int> &freeIdx, vector<int> &lower,
+                  vector<int> &upper) {
+  for (int i = 0; i < m.rows(); ++i) {
+    if ((m.row(i).array().cwiseAbs() > kTol).count() == 2) {
+      for (int j : freeIdx) {
+        if (abs(m(i, j)) > kTol) {
+          if (m(i, j) > 0) {
+            upper[j] = min(static_cast<int>(ceil(b(i) / m(i, j))), upper[j]);
+          } else {
+            lower[j] = max(static_cast<int>(floor(b(i) / m(i, j))), lower[j]);
+          }
+        }
+      }
+    }
+  }
 }
 
 int getNumPresses(const Machine &machine) {
@@ -171,19 +189,21 @@ int getNumPresses(const Machine &machine) {
 
   toRref(m, b);
   int minPresses{getMinPresses(m, b)};
-  cout << "minPress: " << minPresses << endl;
   vector<int> freeIdx{getFreeIdx(m)};
+  updateBounds(m, b, freeIdx, lower, upper);
   VectorXd solution(m.cols());
   if (freeIdx.empty()) {
     backSub(solution, m, b);
     return round(solution.sum());
   }
 
+  auto currLower = lower;
+
   int minNum{numeric_limits<int>::max()};
   while (true) {
     solution = VectorXd::Zero(m.cols());
     for (auto j : freeIdx) {
-      solution[j] = lower[j];
+      solution[j] = currLower[j];
     }
     backSub(solution, m, b);
 
@@ -195,36 +215,35 @@ int getNumPresses(const Machine &machine) {
 
     bool done = true;
     for (auto j : freeIdx) {
-      if (lower[j] < upper[j]) {
+      if (currLower[j] < upper[j]) {
         done = false;
         break;
       }
     }
 
-    if (done)
-      break;
+    if (done) break;
 
     for (auto j : freeIdx) {
       upper[j] = min(upper[j], minNum - minPresses);
       lower[j] = min(lower[j], upper[j]);
+      currLower[j] = min(currLower[j], upper[j]);
     }
 
     int idx{0};
     bool updated{false};
     while (idx < freeIdx.size()) {
       int j{freeIdx[idx]};
-      if ((lower[j] < upper[j]) &&
-          accumulate(lower.begin(), lower.end(), minPresses) < minNum) {
-        ++lower[j];
+      if ((currLower[j] < upper[j]) &&
+          accumulate(currLower.begin(), currLower.end(), minPresses) < minNum) {
+        ++currLower[j];
         updated = true;
         break;
       }
-      lower[j] = 0;
+      currLower[j] = lower[j];
       ++idx;
     }
 
-    if (!updated)
-      break;
+    if (!updated) break;
   }
 
   return minNum;
@@ -238,8 +257,7 @@ vector<Machine> getMachines(const vector<string> &lines) {
     iss >> data;
     vector<vector<int>> buttons;
     while (iss >> data) {
-      if (data[0] == '{')
-        break;
+      if (data[0] == '{') break;
 
       string_view buttonStr{string_view(data) | views::take(data.length() - 1) |
                             views::drop(1)};
